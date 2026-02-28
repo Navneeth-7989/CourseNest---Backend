@@ -46,10 +46,6 @@ if(!parsedData.success){
             message: "Signed Up Successfully"
         })
     } catch (error) {
-
-    console.log("FULL ERROR:", error);
-    console.log("ERROR MESSAGE:", error.message);
-
     res.status(500).json({
         message: "Error creating user"
     });
@@ -74,7 +70,7 @@ const isMatch = await bcrypt.compare(password, user.password);
 if(isMatch){
     const token = jwt.sign({
         id: user._id
-    }, process.env.JWT_SECRET)
+    }, process.env.JWT_USER_SECRET)
     res.json({
         token: token
     })
