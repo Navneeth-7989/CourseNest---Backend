@@ -1,6 +1,6 @@
 const {Router} = require("express");
 const adminRouter = Router();
-const {adminModel} = require("../db");
+const {adminModel, courseModel} = require("../db");
 const { z } = require("zod");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -82,20 +82,74 @@ adminRouter.post("/signin", async (req, res)=>{
     }
 })
 
-adminRouter.post("/create-course", adminMiddleware, (req, res)=>{
+adminRouter.post("/create-course", adminMiddleware, async (req, res)=>{
+    const adminId = req.adminId;
+    const {title, description, imageUrl, price} = req.body;
+  try {
+     const course =  await courseModel.create({
+        title,
+        description,
+         price,
+        imageUrl,
+        creatorId: adminId
+
+    }) 
     res.json({
-        message: "This is the admin create course endpoint"
+        message: "Course Created",
+        courseId: course._id
     })
+  } catch (error) {
+    res.status(403).json({
+        
+        message: "Error while creating the course"
+    })
+  }
 })
-adminRouter.put("/change-course", (req, res)=>{
+
+adminRouter.put("/change-course", adminMiddleware,  async (req, res)=>{
+   const adminId = req.adminId;
+   const {title, description, imageUrl, price, courseId} = req.body;
+   try {
+    const course = await courseModel.findOneAndUpdate({
+        _id: courseId,
+        creatorId: adminId
+    },{
+        title: title,
+        description: description,
+        imageUrl: imageUrl,
+        price: price
+    },{new: true});
+    if(!course){
+        return res.status(404).json({
+            message: "Course not found or you are not the creator"
+        });
+    }
     res.json({
-        message: "This is the admin change course endpoint"
+        message: "Course Updated",
+        courseId: course._id
+    });
+   } catch (error) {
+    res.status(403).json({
+        message: "Error while updating course"
     })
+   }
 })
-adminRouter.get("/course/bulk", (req, res)=>{
-    res.json({
-        message: "This is the admin all courses endpoint"
-    })
+
+adminRouter.get("/course/bulk", adminMiddleware, async (req, res)=>{
+    const adminId = req.adminId;
+    try {
+        const courses = await courseModel.find({
+            creatorId: adminId
+        });
+        res.json({
+            courses
+            
+        })
+    } catch (error) {
+        res.status(403).json({
+            message: "Cannot get your courses"
+        })
+    }
 })
 
 
