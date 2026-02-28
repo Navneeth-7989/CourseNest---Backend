@@ -4,6 +4,7 @@ const {adminModel} = require("../db");
 const { z } = require("zod");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const {adminMiddleware} = require("../middleware/admin")
 
 
 
@@ -81,7 +82,7 @@ adminRouter.post("/signin", async (req, res)=>{
     }
 })
 
-adminRouter.post("/create-course", (req, res)=>{
+adminRouter.post("/create-course", adminMiddleware, (req, res)=>{
     res.json({
         message: "This is the admin create course endpoint"
     })
