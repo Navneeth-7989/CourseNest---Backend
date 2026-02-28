@@ -1,6 +1,6 @@
 const {Router} = require("express");
 const userRouter = Router();
-const {userModel} = require("../db");
+const {userModel, purchaseModel, courseModel} = require("../db");
 const { z } = require("zod")
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -91,10 +91,19 @@ if(isMatch){
 })
 
 
-userRouter.get("/purchases", (req, res)=>{
-    res.json({
-        message: "This is the user Purchases endpoint"
-    })
+userRouter.get("/purchases", userMiddleware, async (req, res)=>{
+   const userId = req.userId;
+   const purchases = await purchaseModel.find({
+    userId,
+   });
+
+   const coursesData = await courseModel.find({
+    _id: {$in: purchases.map(x => x.courseId)}
+   })
+   res.json({
+    purchases,
+    coursesData
+   })
 })
 
 module.exports = {
