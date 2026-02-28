@@ -3,9 +3,9 @@ const app = express();
 const {userRouter} = require("./routes/user")
 const {courseRouter} = require("./routes/course");
 const {adminRouter} = require("./routes/admin")
-
+const {connectDB }= require("./db")
 app.use(express.json());
-
+connectDB();
 
 
 
